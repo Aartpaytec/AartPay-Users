@@ -1,4 +1,12 @@
 {
-  "buildCommand": "vite build",
-  "outputDirectory": "dist"
+  "buildCommand": "pnpm --filter @workspace/api-server build",
+  "installCommand": "pnpm install",
+  "outputDirectory": "artifacts/api-server/dist",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "artifacts/api-server/dist/index.mjs"
+    }
+  ]
 }
