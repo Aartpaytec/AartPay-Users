@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AartPay Tech"
+description = "A simple user registration interface for AartPay Tech, connected to its Express API to create users and list registered users."
+version = "1.0.0"
+id = "artifacts/aartpay-tech"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25487
+
+[services.development]
+run = "pnpm --filter @workspace/aartpay-tech run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/aartpay-tech", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/aartpay-tech/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25487"
+BASE_PATH = "/"

@@ -10,7 +10,22 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: AartPay Tech user registration
 paths:
+  /:
+    get:
+      operationId: getApiHome
+      tags: [health]
+      summary: API home
+      description: Returns a welcome message for the AartPay Tech API
+      responses:
+        "200":
+          description: API welcome message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeResponse"
   /healthz:
     get:
       operationId: healthCheck
@@ -24,8 +39,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /register:
+    post:
+      operationId: registerUser
+      tags: [users]
+      summary: Register a user
+      description: Creates a user with a starting balance of zero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Registered user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid user data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List registered users
+      responses:
+        "200":
+          description: Registered users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
 components:
   schemas:
+    HomeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
     HealthStatus:
       type: object
       properties:
@@ -33,4 +94,36 @@ components:
           type: string
       required:
         - status
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        balance:
+          type: number
+      required:
+        - name
+        - phone
+        - balance
+    UserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+      required:
+        - name
+        - phone
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 

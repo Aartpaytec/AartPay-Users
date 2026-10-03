@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import { GetApiHomeResponse } from "@workspace/api-zod";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
@@ -28,6 +29,10 @@ app.use(
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (_req, res) => {
+  res.json(GetApiHomeResponse.parse({ message: "Welcome to AartPay Tech API" }));
+});
 
 app.use("/api", router);
 
