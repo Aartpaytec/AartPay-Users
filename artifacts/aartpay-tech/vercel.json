@@ -1,7 +1,5 @@
 {
-  "framework": "vite",
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
-  "installCommand": "pnpm install",
+  "buildCommand": "cd artifacts/aartpay-tech && npm install && npm run build",
+  "outputDirectory": "artifacts/aartpay-tech/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
