@@ -1,7 +1,7 @@
 {
-  "installCommand": "echo skip root install",
-  "buildCommand": "cd artifacts/aartpay-tech && pnpm install && pnpm run build",
-  "outputDirectory": "artifacts/aartpay-tech/dist",
   "framework": "vite",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
