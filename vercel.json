@@ -1,22 +1,13 @@
 {
   "services": {
     "aartpay-tech": {
-      "rootDirectory": "artifacts/aartpay-tech",
-      "framework": "vite",
-      "buildCommand": "npm run build",
-      "installCommand": "npm install"
+      "root": "artifacts/aartpay-tech"
     },
     "api-server": {
-      "rootDirectory": "artifacts/api-server",
-      "framework": "other",
-      "buildCommand": "npm run build",
-      "installCommand": "npm install"
+      "root": "artifacts/api-server"
     },
     "mockup-sandbox": {
-      "rootDirectory": "artifacts/mockup-sandbox",
-      "framework": "vite",
-      "buildCommand": "npm run build",
-      "installCommand": "npm install"
+      "root": "artifacts/mockup-sandbox"
     }
   }
 }
