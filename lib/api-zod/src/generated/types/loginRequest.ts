@@ -6,13 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface UserInput {
-  /** @minLength 1 */
-  name: string;
+export interface LoginRequest {
   /** @minLength 1 */
   phone: string;
   /**
-     * @minLength 8
+     * @minLength 1
      * @maxLength 72
      */
   password: string;

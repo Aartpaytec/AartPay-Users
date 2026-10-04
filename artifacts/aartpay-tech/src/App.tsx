@@ -1,18 +1,29 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import {
+  getMe,
   getGetApiHomeQueryKey,
   getHealthCheckQueryKey,
   getListUsersQueryKey,
+  type LoginResponse,
+  type User as ApiUser,
   useGetApiHome,
   useHealthCheck,
   useListUsers,
   useRegisterUser,
 } from '@workspace/api-client-react';
-import { ArrowUpRight, Check, CircleAlert, LockKeyhole, Plus, RefreshCw, ShieldCheck, UsersRound, WalletCards } from 'lucide-react';
+import { ArrowUpRight, CircleAlert, LockKeyhole, LogOut, Plus, RefreshCw, ShieldCheck, UsersRound, WalletCards } from 'lucide-react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import {
+  clearAuthTokens,
+  installAuthTokenGetter,
+  readAuthTokens,
+  saveAuthTokens,
+  subscribeToAuthCleared,
+} from '@/lib/auth-session';
+import LoginPage from '@/pages/login';
 import NotFound from '@/pages/not-found';
 import {
   Route,
@@ -23,7 +34,136 @@ import {
 
 const queryClient = new QueryClient();
 
-function Home() {
+type AuthStatus = 'checking' | 'authenticated' | 'unauthenticated' | 'unavailable';
+
+function AuthenticatedApp() {
+  const client = useQueryClient();
+  const [user, setUser] = useState<ApiUser | null>(null);
+  const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
+
+  const verifySession = useCallback(async () => {
+    if (!readAuthTokens()) {
+      setUser(null);
+      setAuthStatus('unauthenticated');
+      return;
+    }
+
+    setAuthStatus('checking');
+    try {
+      const currentUser = await getMe();
+      if (!readAuthTokens()) {
+        return;
+      }
+      setUser(currentUser);
+      setAuthStatus('authenticated');
+    } catch (error) {
+      const status =
+        typeof error === 'object' && error !== null && 'status' in error
+          ? error.status
+          : undefined;
+
+      if (status === 401 || !readAuthTokens()) {
+        clearAuthTokens();
+        client.clear();
+        setUser(null);
+        setAuthStatus('unauthenticated');
+      } else {
+        setAuthStatus('unavailable');
+      }
+    }
+  }, [client]);
+
+  useEffect(() => {
+    installAuthTokenGetter();
+    const unsubscribe = subscribeToAuthCleared(() => {
+      client.clear();
+      setUser(null);
+      setAuthStatus('unauthenticated');
+    });
+    void verifySession();
+    return unsubscribe;
+  }, [client, verifySession]);
+
+  function handleAuthenticated(response: LoginResponse) {
+    saveAuthTokens({
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+    });
+    client.clear();
+    setUser(response.user);
+    setAuthStatus('authenticated');
+  }
+
+  function handleSignOut() {
+    clearAuthTokens();
+    client.clear();
+    setUser(null);
+    setAuthStatus('unauthenticated');
+  }
+
+  if (authStatus === 'checking') {
+    return <SessionStateScreen checking />;
+  }
+
+  if (authStatus === 'unavailable') {
+    return (
+      <SessionStateScreen
+        onRetry={() => void verifySession()}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
+
+  if (authStatus === 'unauthenticated' || !user) {
+    return <LoginPage onAuthenticated={handleAuthenticated} />;
+  }
+
+  return <Home user={user} onSignOut={handleSignOut} />;
+}
+
+function SessionStateScreen({
+  checking = false,
+  onRetry,
+  onSignOut,
+}: {
+  checking?: boolean;
+  onRetry?: () => void;
+  onSignOut?: () => void;
+}) {
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <div className="brand" aria-label="AartPay Tech">
+          <span className="brand-mark"><WalletCards size={19} strokeWidth={1.8} /></span>
+          <span>AartPay <span style={{ fontWeight: 500 }}>Tech</span></span>
+        </div>
+      </header>
+      <section className="session-state" role={checking ? 'status' : 'alert'}>
+        <span className="state-symbol">
+          <RefreshCw size={18} className={checking ? 'animate-spin' : ''} />
+        </span>
+        <h1>{checking ? 'Checking your session' : 'We could not verify your session'}</h1>
+        <p>
+          {checking
+            ? 'Please wait while AartPay confirms your sign-in.'
+            : 'Your saved sign-in is still on this device. Check your connection and retry.'}
+        </p>
+        {!checking && (
+          <div className="session-actions">
+            <button className="retry-button" type="button" onClick={onRetry}>
+              <RefreshCw size={13} /> Try again
+            </button>
+            <button className="session-signout" type="button" onClick={onSignOut}>
+              Sign out
+            </button>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function Home({ user, onSignOut }: { user: ApiUser; onSignOut: () => void }) {
   const client = useQueryClient();
   const home = useGetApiHome({ query: { queryKey: getGetApiHomeQueryKey() } });
   const health = useHealthCheck({
@@ -33,6 +173,7 @@ function Home() {
   const registerUser = useRegisterUser();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const healthStatus = health.data?.status?.toLowerCase();
@@ -44,18 +185,19 @@ function Home() {
     setSuccessMessage('');
     const cleanName = name.trim();
     const cleanPhone = phone.trim();
-    if (!cleanName || !cleanPhone) {
-      setFormError('Enter a name and phone number to continue.');
+    if (!cleanName || !cleanPhone || password.length < 8) {
+      setFormError('Enter a name, phone number, and a password of at least 8 characters.');
       return;
     }
 
     registerUser.mutate(
-      { data: { name: cleanName, phone: cleanPhone } },
+      { data: { name: cleanName, phone: cleanPhone, password } },
       {
         onSuccess: (user) => {
           void client.invalidateQueries({ queryKey: getListUsersQueryKey() });
           setName('');
           setPhone('');
+          setPassword('');
           setSuccessMessage(`${user.name} is registered with a starting balance of ${formatBalance(user.balance)}.`);
         },
         onError: (error) => {
@@ -73,9 +215,20 @@ function Home() {
           <span className="brand-mark"><WalletCards size={19} strokeWidth={1.8} /></span>
           <span>AartPay <span style={{ fontWeight: 500 }}>Tech</span></span>
         </div>
-        <div className="top-status" data-testid="status-api">
-          <span className={`status-lamp ${health.isError ? 'offline' : health.isLoading ? '' : isHealthy ? 'online' : 'offline'}`} />
-          {health.isLoading ? 'Checking API' : health.isError ? 'API unavailable' : `API ${health.data?.status ?? 'status unknown'}`}
+        <div className="top-actions">
+          <div className="top-status" data-testid="status-api">
+            <span className={`status-lamp ${health.isError ? 'offline' : health.isLoading ? '' : isHealthy ? 'online' : 'offline'}`} />
+            {health.isLoading ? 'Checking API' : health.isError ? 'API unavailable' : `API ${health.data?.status ?? 'status unknown'}`}
+          </div>
+          <span className="signed-in-name" data-testid="text-signed-in-user">{user.name}</span>
+          <button
+            className="signout-button"
+            type="button"
+            onClick={onSignOut}
+            data-testid="button-sign-out"
+          >
+            <LogOut size={14} /> Sign out
+          </button>
         </div>
       </header>
 
@@ -126,6 +279,19 @@ function Home() {
                   required
                 />
               </label>
+              <label className="field">
+                <span className="field-label">Password</span>
+                <input
+                  autoComplete="new-password"
+                  data-testid="input-password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={8}
+                  required
+                />
+              </label>
               {formError && <p className="form-error" role="alert" data-testid="text-registration-error">{formError}</p>}
               {successMessage && <p className="form-error" style={{ color: '#426e56' }} role="status" data-testid="text-registration-success">{successMessage}</p>}
               <button className="submit-button" data-testid="button-register" type="submit" disabled={registerUser.isPending}>
@@ -135,7 +301,7 @@ function Home() {
                   <>Add person <ArrowUpRight size={16} /></>
                 )}
               </button>
-              <p className="form-note"><LockKeyhole size={12} /> Details are used only to create their AartPay profile.</p>
+              <p className="form-note"><LockKeyhole size={12} /> Passwords are stored as secure hashes and never returned.</p>
             </form>
             {!home.isError && (
               <div className="welcome-strip" data-testid="text-home-message">
@@ -241,7 +407,7 @@ function Router() {
     // survives a page crash.
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={Home} />
+        <Route path="/" component={AuthenticatedApp} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

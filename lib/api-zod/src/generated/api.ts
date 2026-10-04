@@ -32,17 +32,23 @@ export const HealthCheckResponse = zod.object({
  */
 
 
+export const registerUserBodyPasswordMin = 8;
+export const registerUserBodyPasswordMax = 72;
+
 
 
 export const RegisterUserBody = zod.object({
   "name": zod.string().min(1),
-  "phone": zod.string().min(1)
+  "phone": zod.string().min(1),
+  "password": zod.string().min(registerUserBodyPasswordMin).max(registerUserBodyPasswordMax)
 })
 
 export const RegisterUserResponse = zod.object({
+  "id": zod.number().int(),
   "name": zod.string(),
   "phone": zod.string(),
-  "balance": zod.number()
+  "balance": zod.number(),
+  "password": zod.string().optional().describe('Write-only account password; never returned by the API.')
 })
 
 
@@ -50,10 +56,73 @@ export const RegisterUserResponse = zod.object({
  * @summary List registered users
  */
 export const ListUsersResponseItem = zod.object({
+  "id": zod.number().int(),
   "name": zod.string(),
   "phone": zod.string(),
-  "balance": zod.number()
+  "balance": zod.number(),
+  "password": zod.string().optional().describe('Write-only account password; never returned by the API.')
 })
 export const ListUsersResponse = zod.array(ListUsersResponseItem)
+
+
+/**
+ * @summary Log in with a phone number and password
+ */
+
+export const loginUserBodyPasswordMax = 72;
+
+
+
+export const LoginUserBody = zod.object({
+  "phone": zod.string().min(1),
+  "password": zod.string().min(1).max(loginUserBodyPasswordMax)
+})
+
+export const LoginUserResponse = zod.object({
+  "accessToken": zod.string(),
+  "refreshToken": zod.string(),
+  "user": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "balance": zod.number(),
+  "password": zod.string().optional().describe('Write-only account password; never returned by the API.')
+})
+})
+
+
+/**
+ * @summary Rotate an access and refresh token pair
+ */
+
+
+
+export const RefreshBody = zod.object({
+  "refreshToken": zod.string().min(1)
+})
+
+export const RefreshResponse = zod.object({
+  "accessToken": zod.string(),
+  "refreshToken": zod.string(),
+  "user": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "balance": zod.number(),
+  "password": zod.string().optional().describe('Write-only account password; never returned by the API.')
+})
+})
+
+
+/**
+ * @summary Get the authenticated user's profile
+ */
+export const GetMeResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "balance": zod.number(),
+  "password": zod.string().optional().describe('Write-only account password; never returned by the API.')
+})
 
 

@@ -14,9 +14,12 @@ export interface HealthStatus {
 }
 
 export interface User {
+  id: number;
   name: string;
   phone: string;
   balance: number;
+  /** Write-only account password; never returned by the API. */
+  password?: string;
 }
 
 export interface UserInput {
@@ -24,6 +27,32 @@ export interface UserInput {
   name: string;
   /** @minLength 1 */
   phone: string;
+  /**
+     * @minLength 8
+     * @maxLength 72
+     */
+  password: string;
+}
+
+export interface LoginRequest {
+  /** @minLength 1 */
+  phone: string;
+  /**
+     * @minLength 1
+     * @maxLength 72
+     */
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
+export interface RefreshRequest {
+  /** @minLength 1 */
+  refreshToken: string;
 }
 
 export interface ErrorResponse {

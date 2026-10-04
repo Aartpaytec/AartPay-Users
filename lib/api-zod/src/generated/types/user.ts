@@ -7,7 +7,10 @@
  */
 
 export interface User {
+  id: number;
   name: string;
   phone: string;
   balance: number;
+  /** Write-only account password; never returned by the API. */
+  password?: string;
 }
