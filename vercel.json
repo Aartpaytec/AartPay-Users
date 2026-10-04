@@ -10,7 +10,10 @@
     },
     "api-server": {
       "root": "artifacts/api-server",
-      "framework": "express"
+      "buildCommand": "node build.mjs",
+      "installCommand": "npm install",
+      "outputDirectory": "dist",
+      "framework": null
     },
     "mockup-sandbox": {
       "root": "artifacts/mockup-sandbox",
