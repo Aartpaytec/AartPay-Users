@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "aartpay-tech": {
+      "root": "artifacts/aartpay-tech",
+      "framework": "vite",
+      "bindings": [
+        { "type": "service", "service": "api-server", "format": "url", "env": "VITE_API_URL" }
+      ]
+    },
+    "api-server": {
+      "root": "artifacts/api-server",
+      "framework": "express"
+    },
+    "mockup-sandbox": {
+      "root": "artifacts/mockup-sandbox",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api-server" } },
+    { "source": "/(.*)", "destination": { "service": "aartpay-tech" } }
+  ]
+}
