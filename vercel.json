@@ -1,27 +1,22 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "aartpay-tech": {
-      "root": "artifacts/aartpay-tech",
+      "rootDirectory": "artifacts/aartpay-tech",
       "framework": "vite",
-      "bindings": [
-        { "type": "service", "service": "api-server", "format": "url", "env": "VITE_API_URL" }
-      ]
+      "buildCommand": "npm run build",
+      "installCommand": "npm install"
     },
     "api-server": {
-      "root": "artifacts/api-server",
-      "buildCommand": "node build.mjs",
-      "installCommand": "npm install",
-      "outputDirectory": "dist",
-      "framework": null
+      "rootDirectory": "artifacts/api-server",
+      "framework": "other",
+      "buildCommand": "npm run build",
+      "installCommand": "npm install"
     },
     "mockup-sandbox": {
-      "root": "artifacts/mockup-sandbox",
-      "framework": "vite"
+      "rootDirectory": "artifacts/mockup-sandbox",
+      "framework": "vite",
+      "buildCommand": "npm run build",
+      "installCommand": "npm install"
     }
-  },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": { "service": "api-server" } },
-    { "source": "/(.*)", "destination": { "service": "aartpay-tech" } }
-  ]
+  }
 }
