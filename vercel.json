@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd aartpay-tech && npm run build",
+  "outputDirectory": "aartpay-tech/dist",
+  "installCommand": "npm install --prefix aartpay-tech",
+  "framework": "vite"
+}
