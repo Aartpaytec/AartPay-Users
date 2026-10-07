@@ -1,37 +1,101 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 
-export default function Signin() {
+export default function SignIn() {
   const [, setLocation] = useLocation();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = () => {
+    setError("");
     if (!phone || !password) {
-      alert("Please enter phone and password");
+      setError("Please enter phone and password");
       return;
     }
-    alert("Signing in with: " + phone);
+
+    setLoading(true);
+
+    // Get saved users from localStorage (saved during Sign Up)
+    const savedUsers = JSON.parse(localStorage.getItem("aartpay_users") || "[]");
+    
+    // Find user with this phone
+    const user = savedUsers.find((u: any) => u.phone === phone);
+
+    setTimeout(() => {
+      if (!user) {
+        setError("No account found with this phone. Please Sign Up first.");
+        setLoading(false);
+        return;
+      }
+
+      if (user.password !== password) {
+        setError("Incorrect password. Try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Success - save login session
+      localStorage.setItem("aartpay_current_user", JSON.stringify(user));
+      localStorage.setItem("aartpay_is_logged_in", "true");
+      
+      setLoading(false);
+      alert("Welcome back! Login successful 🎉");
+      setLocation("/dashboard");
+    }, 800);
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F7", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div style={{ background: "white", padding: 32, borderRadius: 16, maxWidth: 400, width: "100%" }}>
-        <h1 style={{ fontSize: 28, fontWeight: "bold", textAlign: "center" }}>Welcome Back</h1>
-        <p style={{ color: "#666", textAlign: "center", marginBottom: 24 }}>Sign in to your AartPay account</p>
-        
-        <label style={{ display: "block", fontSize: 14, fontWeight: "600", marginBottom: 8 }}>Phone Number</label>
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter phone number" style={{ width: "100%", padding: 14, border: "1px solid #ddd", borderRadius: 8, fontSize: 16, marginBottom: 16 }} />
-        
-        <label style={{ display: "block", fontSize: 14, fontWeight: "600", marginBottom: 8 }}>Password</label>
-        <div style={{ position: "relative", marginBottom: 20 }}>
-          <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" style={{ width: "100%", padding: 14, border: "1px solid #ddd", borderRadius: 8, fontSize: 16 }} />
-          <span onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: 14, top: 14, cursor: "pointer", fontSize: 14, color: "#2563EB" }}>{showPassword ? "Hide" : "Show"}</span>
+    <div style={{ minHeight: "100vh", background: "white", padding: "24px" }}>
+      <div style={{ maxWidth: "400px", margin: "0 auto" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: "bold" }}>Welcome Back</h1>
+        <p style={{ color: "#666", marginBottom: "24px" }}>Sign in to your AartPay account</p>
+
+        {error && (
+          <div style={{ background: "#fee2e2", color: "#dc2626", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px" }}>
+            {error}
+          </div>
+        )}
+
+        <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>Phone Number</label>
+        <input 
+          type="tel" 
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="08012345678"
+          style={{ width: "100%", padding: "12px", border: "1px solid #ddd", borderRadius: "8px", marginBottom: "16px" }}
+        />
+
+        <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>Password</label>
+        <div style={{ position: "relative", marginBottom: "24px" }}>
+          <input 
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            style={{ width: "100%", padding: "12px", border: "1px solid #ddd", borderRadius: "8px" }}
+          />
+          <span 
+            onClick={() => setShowPassword(!showPassword)}
+            style={{ position: "absolute", right: "12px", top: "12px", cursor: "pointer", color: "#666", fontSize: "14px" }}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </span>
         </div>
 
-        <button onClick={handleSignIn} style={{ width: "100%", padding: 14, background: "black", color: "white", border: "none", borderRadius: 8, fontSize: 16, fontWeight: "600", marginBottom: 16 }}>Sign In</button>
-        <p style={{ textAlign: "center", fontSize: 14 }}>Don't have account? <span onClick={() => setLocation("/signup")} style={{ color: "#2563EB", fontWeight: "600", cursor: "pointer" }}>Create Account</span></p>
+        <button 
+          onClick={handleSignIn}
+          disabled={loading}
+          style={{ width: "100%", background: loading ? "#999" : "black", color: "white", padding: "14px", borderRadius: "8px", border: "none", fontWeight: "bold", cursor: "pointer" }}
+        >
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
+
+        <p style={{ textAlign: "center", marginTop: "16px", color: "#666" }}>
+          Don't have an account? <span onClick={() => setLocation("/signup")} style={{ color: "black", fontWeight: "bold", cursor: "pointer" }}>Sign Up</span>
+        </p>
       </div>
     </div>
   );
