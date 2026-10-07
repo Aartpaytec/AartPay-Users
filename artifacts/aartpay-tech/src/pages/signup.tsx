@@ -1,64 +1,88 @@
-import { useState } from "react"
+import { useState } from "react";
+import { useLocation } from "wouter";
 
-export default function Signup(){
-  const [name,setName]=useState("")
-  const [phone,setPhone]=useState("")
-  const [password,setPassword]=useState("")
-  const [showPassword,setShowPassword]=useState(false)
-  const [msg,setMsg]=useState("")
+export default function SignUp() {
+  const [, setLocation] = useLocation();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit=(e:any)=>{
-    e.preventDefault()
-    
-    if(!name || !phone || !password){
-      setMsg("Please fill all fields")
-      return
+  const handleSignUp = () => {
+    setError("");
+    if (!name || !phone || !password) {
+      setError("Please fill all fields");
+      return;
     }
-
-    if(password.length < 6){
-      setMsg("Password must be at least 6 characters")
-      return
+    if (password.length < 4) {
+      setError("Password must be at least 4 characters");
+      return;
     }
+    setLoading(true);
+    try {
+      const savedData = localStorage.getItem("aartpay_users");
+      const users = savedData ? JSON.parse(savedData) : [];
 
-    const users=JSON.parse(localStorage.getItem("aartpay_users") || "[]")
-    
-    // Check if phone already exists
-    if(users.find((u:any) => u.phone === phone)){
-      setMsg("Account already exists with this phone. Please Sign In.")
-      return
+      if (users.find((u: any) => u.phone === phone)) {
+        setError("Phone already registered. Please Sign In.");
+        setLoading(false);
+        return;
+      }
+
+      const newUser = { name, phone, password };
+      users.push(newUser);
+      localStorage.setItem("aartpay_users", JSON.stringify(users));
+      
+      alert("Account created! Now Sign In");
+      setLocation("/signin");
+    } catch (e) {
+      setError("Something went wrong. Try again.");
     }
-
-    users.push({name, phone, password, id: Date.now()})
-    localStorage.setItem("aartpay_users", JSON.stringify(users))
-    
-    setMsg("Account created! Now Sign In 🎉")
-    setName(""); setPhone(""); setPassword("")
-  }
+    setLoading(false);
+  };
 
   return (
-    <div style={{padding:"40px 20px", maxWidth:"400px", margin:"0 auto"}}>
-      <h1 style={{fontSize:"24px",fontWeight:"bold", marginBottom:"8px"}}>Create Account</h1>
-      <p style={{color:"#666", marginBottom:"24px"}}>Join AartPay today</p>
-      
-      <form onSubmit={onSubmit}>
-        <label style={{display:"block", marginBottom:"8px", fontWeight:"500"}}>Full Name</label>
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="John Doe" style={{width:"100%",padding:"12px",border:"1px solid #ddd",borderRadius:"8px",marginBottom:"16px"}} />
-        
-        <label style={{display:"block", marginBottom:"8px", fontWeight:"500"}}>Phone Number</label>
-        <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="08012345678" style={{width:"100%",padding:"12px",border:"1px solid #ddd",borderRadius:"8px",marginBottom:"16px"}} />
-        
-        <label style={{display:"block", marginBottom:"8px", fontWeight:"500"}}>Password</label>
-        <div style={{position:"relative", marginBottom:"20px"}}>
-          <input type={showPassword ? "text" : "password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 6 characters" style={{width:"100%",padding:"12px",border:"1px solid #ddd",borderRadius:"8px"}} />
-          <span onClick={()=>setShowPassword(!showPassword)} style={{position:"absolute", right:"12px", top:"12px", cursor:"pointer", color:"#666", fontSize:"14px"}}>
-            {showPassword ? "Hide" : "Show"}
-          </span>
+    <div style={{ minHeight: "100vh", background: "white", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: "bold", textAlign: "center" }}>Create Account</h1>
+        <p style={{ textAlign: "center", color: "#666", marginTop: "8px", marginBottom: "24px" }}>Join AartPay today</p>
+
+        {error && (
+          <div style={{ background: "#fee2e2", color: "#dc2626", padding: "12px", borderRadius: "8px", fontSize: "14px", marginBottom: "16px" }}>
+            {error}
+          </div>
+        )}
+
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ display: "block", fontSize: "14px", marginBottom: "6px", fontWeight: "500" }}>Full Name</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter full name" style={{ width: "100%", padding: "12px", border: "1px solid #ddd", borderRadius: "10px" }} />
         </div>
-        
-        <button style={{width:"100%",padding:"14px",background:"black",color:"white",border:"none",borderRadius:"8px",fontWeight:"bold", cursor:"pointer"}}>Create Account</button>
-      </form>
-      
-      {msg && <p style={{marginTop:"15px",padding:"12px",background: msg.includes("created") ? "#dcfce7" : "#fee2e2", color: msg.includes("created") ? "#16a34a" : "#dc2626", borderRadius:"8px", fontSize:"14px"}}>{msg}</p>}
+
+        <div style={{ marginBottom: "12px" }}>
+          <label style={{ display: "block", fontSize: "14px", marginBottom: "6px", fontWeight: "500" }}>Phone Number</label>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Enter phone number" style={{ width: "100%", padding: "12px", border: "1px solid #ddd", borderRadius: "10px" }} />
+        </div>
+
+        <div style={{ marginBottom: "24px" }}>
+          <label style={{ display: "block", fontSize: "14px", marginBottom: "6px", fontWeight: "500" }}>Password</label>
+          <div style={{ position: "relative" }}>
+            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create password" type={showPassword ? "text" : "password"} style={{ width: "100%", padding: "12px", border: "1px solid #ddd", borderRadius: "10px" }} />
+            <span onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "12px", top: "12px", cursor: "pointer", fontSize: "14px", color: "#666" }}>
+              {showPassword ? "Hide" : "Show"}
+            </span>
+          </div>
+        </div>
+
+        <button onClick={handleSignUp} disabled={loading} style={{ width: "100%", background: loading ? "#999" : "black", color: "white", padding: "14px", borderRadius: "10px", border: "none", fontWeight: "bold", cursor: "pointer" }}>
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
+
+        <div style={{ textAlign: "center", marginTop: "16px", color: "#666" }}>
+          Already have account? <span onClick={() => setLocation("/signin")} style={{ color: "black", fontWeight: "bold", cursor: "pointer" }}>Sign In</span>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
