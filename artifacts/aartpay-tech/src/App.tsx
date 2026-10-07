@@ -2,9 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch, useLocation, Router as WouterRouter } from "wouter";
 import NotFound from "@/pages/not-found";
 import Signup from "@/pages/signup";
+import Signin from "@/pages/signin";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip-provider";
-import { useState } from "react";
 
 const queryClient = new QueryClient();
 
@@ -38,16 +38,5 @@ function App() {
         <WouterRouter>
           <Switch>
             <Route path="/signup" component={Signup} />
-            <Route path="/signin" component={Signup} />
-            <Route path="/login" component={Signup} />
-            <Route path="/" component={Home} />
-            <Route component={NotFound} />
-          </Switch>
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-}
-
-export default App;
+            <Route path="/signin" component={Signin} />
+            <Route path="/login" component={Signin
