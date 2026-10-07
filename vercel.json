@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm --filter aartpay-tech build",
   "installCommand": "pnpm install",
-  "outputDirectory": "aartpay-tech/dist",
+  "outputDirectory": "artifacts/aartpay-tech/dist",
   "framework": "vite"
 }
