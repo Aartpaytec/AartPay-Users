@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://qbsqgoicgcwtvxtvccsr.supabase.co'
 const supabaseKey = 'sb_publishable_Ub3sy5ZxoSA4c298rCXm3Q_i8gIslnK'
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default function Signin() {
   const [phone, setPhone] = useState('')
@@ -11,12 +9,24 @@ export default function Signin() {
   const [loading, setLoading] = useState(false)
 
   const handleSignin = async () => {
-    if (!phone || !password) { alert('Fill all'); return }
+    if (!phone ||!password) { alert('Fill all'); return }
     setLoading(true)
-    const { data, error } = await supabase.from('users').select('*').eq('phone', phone.trim()).eq('password', password).single()
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/users?phone=eq.${phone.trim()}&password=eq.${password}&select=*`, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        }
+      })
+      const data = await res.json()
+      if (!res.ok ||!data || data.length === 0) throw new Error('No account found')
+      localStorage.setItem('user', JSON.stringify(data[0]))
+      alert('Welcome '+data[0].name)
+      window.location.href = '/dashboard'
+    } catch (e:any) {
+      alert('Login failed: ' + e.message)
+    }
     setLoading(false)
-    if (error || !data) alert('No account found')
-    else { localStorage.setItem('user', JSON.stringify(data)); window.location.href = '/dashboard' }
   }
 
   return (
@@ -24,7 +34,7 @@ export default function Signin() {
       <h2>Sign In - AartPay</h2>
       <input placeholder="Phone" value={phone} onChange={e=>setPhone(e.target.value)} style={{ display:'block', marginBottom:10, padding:12, width:'100%'}} />
       <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{ display:'block', marginBottom:10, padding:12, width:'100%'}} />
-      <button onClick={handleSignin} disabled={loading} style={{ padding:12, width:'100%', background:'black', color:'white' }}>{loading?'...':'Sign In'}</button>
+      <button onClick={handleSignin} disabled={loading} style={{ padding:12, width:'100%', background:'black', color:'white' }}>{loading?'Checking...':'Sign In'}</button>
     </div>
   )
 }
