@@ -15,8 +15,8 @@ export default function Signin() {
     setLoading(true)
     const { data, error } = await supabase.from('users').select('*').eq('phone', phone.trim()).eq('password', password).single()
     setLoading(false)
-    if (error || !data) alert('No account found - check phone/password')
-    else { localStorage.setItem('user', JSON.stringify(data)); alert('Welcome '+data.name); window.location.href='/dashboard' }
+    if (error || !data) alert('No account found')
+    else { localStorage.setItem('user', JSON.stringify(data)); window.location.href = '/dashboard' }
   }
 
   return (
@@ -24,8 +24,7 @@ export default function Signin() {
       <h2>Sign In - AartPay</h2>
       <input placeholder="Phone" value={phone} onChange={e=>setPhone(e.target.value)} style={{ display:'block', marginBottom:10, padding:12, width:'100%'}} />
       <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{ display:'block', marginBottom:10, padding:12, width:'100%'}} />
-      <button onClick={handleSignin} disabled={loading} style={{ padding:12, width:'100%', background:'black', color:'white' }}>{loading?'Checking...':'Sign In'}</button>
-      <p style={{marginTop:10}}><a href="/signup">No account? Sign Up</a></p>
+      <button onClick={handleSignin} disabled={loading} style={{ padding:12, width:'100%', background:'black', color:'white' }}>{loading?'...':'Sign In'}</button>
     </div>
   )
 }
