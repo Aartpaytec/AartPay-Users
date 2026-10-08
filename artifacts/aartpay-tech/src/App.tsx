@@ -1,44 +1,22 @@
-import { Route, Switch, useLocation, Router } from "wouter";
-import { useEffect, useState } from "react";
-
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import Dashboard from "./pages/dashboard";
+import CryptoEscrow from "./pages/crypto";
+import NotFound from "./pages/not-found";
 
-function AppRoutes() {
+function RoutesComp() {
   const [location, setLocation] = useLocation();
-
-  useEffect(() => {
-    try {
-      const loggedIn = localStorage.getItem("aartpay_is_logged_in");
-      if (location === "/" || location === "") {
-        if (loggedIn === "true") {
-          setLocation("/dashboard");
-        } else {
-          setLocation("/signin");
-        }
-      }
-    } catch (e) {
-      console.log("routing error", e);
-      setLocation("/signin");
-    }
-  }, [location]);
-
+  useEffect(() => { if (location === "/") setLocation("/signin"); }, [location, setLocation]);
   return (
     <Switch>
       <Route path="/signin" component={SignIn} />
       <Route path="/signup" component={SignUp} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/">{() => <div style={{padding: 20}}>Loading...</div>}</Route>
-      <Route>404 - Go to SignIn</Route>
+      <Route path="/crypto" component={CryptoEscrow} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
-
-export default function App() {
-  return (
-    <Router>
-      <AppRoutes />
-    </Router>
-  );
-}
+export default function App() { return <RoutesComp />; }
