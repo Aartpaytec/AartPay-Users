@@ -8,7 +8,16 @@ import NotFound from "./pages/not-found";
 
 function RoutesComp() {
   const [location, setLocation] = useLocation();
-  useEffect(() => { if (location === "/") setLocation("/signin"); }, [location, setLocation]);
+  useEffect(() => {
+    if (location === "/") {
+      const isLoggedIn = localStorage.getItem("aartpay_is_logged_in");
+      if (isLoggedIn === "true") {
+        setLocation("/dashboard");
+      } else {
+        setLocation("/signin");
+      }
+    }
+  }, [location, setLocation]);
   return (
     <Switch>
       <Route path="/signin" component={SignIn} />
