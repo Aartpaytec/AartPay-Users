@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://qbsqgoicgcwtvxtvccsr.supabase.co'
 const supabaseKey = 'sb_publishable_Ub3sy5ZxoSA4c298rCXm3Q_i8gIslnK'
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default function Signup() {
   const [name, setName] = useState('')
@@ -12,12 +10,27 @@ export default function Signup() {
   const [loading, setLoading] = useState(false)
 
   const handleSignup = async () => {
-    if (!name || !phone || !password) { alert('Fill all fields'); return }
+    if (!name ||!phone ||!password) { alert('Fill all fields'); return }
     setLoading(true)
-    const { error } = await supabase.from('users').insert([{ name: name.trim(), phone: phone.trim(), password }])
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ name: name.trim(), phone: phone.trim(), password })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed')
+      alert('Account created! Now login')
+      window.location.href = '/signin'
+    } catch (e:any) {
+      alert('Error: ' + e.message)
+    }
     setLoading(false)
-    if (error) alert('Error: ' + error.message)
-    else { alert('Account created! Go login'); window.location.href = '/signin' }
   }
 
   return (
