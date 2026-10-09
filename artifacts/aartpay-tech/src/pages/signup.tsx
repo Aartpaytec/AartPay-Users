@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -9,49 +9,50 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignUp = async () => {
-    if (!email || !phone || !password) {
-      alert("Fill Email, Phone and Password");
-      return;
-    }
-    if (phone.length < 10) {
-      alert("Enter valid phone e.g 08012345678");
-      return;
-    }
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
+
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+      email,
       password,
-      options: { data: { phone: phone.trim() } }
+      options: {
+        data: { phone: phone }
+      }
     });
-    setLoading(false);
+
     if (error) {
       alert(error.message);
-    } else {
-      if (data.user) {
-        // save to profiles if table exists
-        await supabase.from("profiles").insert({
-          id: data.user.id,
-          email: email.trim().toLowerCase(),
-          phone: phone.trim()
-        });
-      }
-      alert("Account created! Phone: " + phone);
-      navigate("/signin");
+      setLoading(false);
+      return;
     }
+
+    // Save phone to profiles table also
+    if (data.user) {
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        email: email,
+        phone: phone
+      });
+    }
+
+    setLoading(false);
+    // AUTO GO TO DASHBOARD - NO NEED LOGIN AGAIN
+    navigate("/dashboard");
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "60px auto", padding: 24, fontFamily: 'sans-serif', border: '1px solid #eee', borderRadius: 16 }}>
-      <h2>Create Account</h2>
-      <p style={{fontSize: '13px', color:'#666'}}>Email + Phone Number required</p>
-      <input style={{width:'100%', padding:'14px', margin:'8px 0', borderRadius:'10px', border:'1px solid #ddd'}} placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
-      <input style={{width:'100%', padding:'14px', margin:'8px 0', borderRadius:'10px', border:'1px solid #ddd'}} placeholder="Phone 080..." value={phone} onChange={e=>setPhone(e.target.value)} type="tel" />
-      <input style={{width:'100%', padding:'14px', margin:'8px 0', borderRadius:'10px', border:'1px solid #ddd'}} placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} type="password" />
-      <button style={{width:'100%', padding:'14px', marginTop:'10px', borderRadius:'10px', background:'black', color:'white', border:'none', fontWeight:'bold'}} onClick={handleSignUp} disabled={loading}>
-        {loading? "Creating..." : "Register with Email & Number"}
-      </button>
-      <p style={{textAlign:'center', marginTop: 12}}>Already have? <Link to="/signin" style={{fontWeight:'bold'}}>Sign In</Link></p>
+    <div style={{maxWidth:400, margin:"40px auto", padding:24}}>
+      <h2>Create AartPay Account</h2>
+      <form onSubmit={handleSignUp} style={{display:"flex", flexDirection:"column", gap:12, marginTop:20}}>
+        <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} required style={{padding:12, borderRadius:8, border:"1px solid #ccc"}} />
+        <input type="tel" placeholder="Phone 080..." value={phone} onChange={e=>setPhone(e.target.value)} required style={{padding:12, borderRadius:8, border:"1px solid #ccc"}} />
+        <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} required style={{padding:12, borderRadius:8, border:"1px solid #ccc"}} />
+        <button type="submit" disabled={loading} style={{padding:12, borderRadius:8, background:"black", color:"white", border:"none", fontWeight:"bold"}}>
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
+      </form>
+      <p style={{marginTop:12}}>Already have account? <Link to="/signin">Sign In</Link></p>
     </div>
   );
 }
