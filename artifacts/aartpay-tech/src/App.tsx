@@ -1,5 +1,5 @@
-import { Route, Switch, useLocation } from "wouter";
 import { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import Dashboard from "./pages/dashboard";
@@ -7,25 +7,35 @@ import CryptoEscrow from "./pages/crypto";
 import NotFound from "./pages/not-found";
 
 function RoutesComp() {
-  const [location, setLocation] = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (location === "/") {
-      const isLoggedIn = localStorage.getItem("aartpay_is_logged_in");
+    if (location.pathname === "/") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
       if (isLoggedIn === "true") {
-        setLocation("/dashboard");
+        navigate("/dashboard");
       } else {
-        setLocation("/signin");
+        navigate("/signin");
       }
     }
-  }, [location, setLocation]);
+  }, [location, navigate]);
+
   return (
-    <Switch>
-      <Route path="/signin" component={SignIn} />
-      <Route path="/signup" component={SignUp} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/crypto" component={CryptoEscrow} />
-      <Route component={NotFound} />
-    </Switch>
+    <Routes>
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/crypto" element={<CryptoEscrow />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
-export default function App() { return <RoutesComp />; }
+
+export default function App() {
+  return (
+    <Router>
+      <RoutesComp />
+    </Router>
+  );
+}
