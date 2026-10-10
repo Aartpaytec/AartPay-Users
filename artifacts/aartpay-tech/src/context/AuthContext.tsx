@@ -5,18 +5,25 @@ const AuthContext = createContext<any>(null)
 
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<any>(() => {
-    const saved = localStorage.getItem("aartpay_user")
-    return saved? JSON.parse(saved) : null
+    try {
+      const saved = localStorage.getItem("aartpay_user")
+      return saved? JSON.parse(saved) : null
+    } catch { return null }
   })
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (user) localStorage.setItem("aartpay_user", JSON.stringify(user))
+    if (user) {
+      localStorage.setItem("aartpay_user", JSON.stringify(user))
+    }
   }, [user])
 
   const register = async (phone: string, email: string, password: string, name: string) => {
+    // 1. Insert
     const { data, error } = await supabase.from("users").insert([{ phone, email, name, password }]).select().single()
     if (error) throw error
+    // 2. AUTO LOGIN IMMEDIATELY - THIS FIXES YOUR NO 2
+    setUser(data)
+    localStorage.setItem("aartpay_user", JSON.stringify(data))
     return data
   }
 
@@ -33,7 +40,7 @@ export const AuthProvider = ({ children }: any) => {
     localStorage.removeItem("aartpay_user")
   }
 
-  return <AuthContext.Provider value={{ user, login, register, logout, loading }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, login, register, logout }}>{children}</AuthContext.Provider>
 }
 
 export const useAuth = () => useContext(AuthContext)
