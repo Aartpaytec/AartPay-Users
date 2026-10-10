@@ -13,14 +13,6 @@ export default function App() {
       <Route path="/transfer" element={<Transfer />} />
       <Route path="/signin" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/gift-cards" element={<Service />} />
-      <Route path="/crypto" element={<Service />} />
-      <Route path="/airtime" element={<Service />} />
-      <Route path="/data" element={<Service />} />
-      <Route path="/electricity" element={<Service />} />
-      <Route path="/tv" element={<Service />} />
-      <Route path="/betting" element={<Service />} />
-      <Route path="/dollar-cards" element={<Service />} />
       <Route path="/:id" element={<Service />} />
     </Routes>
   );
