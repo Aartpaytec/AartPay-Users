@@ -9,18 +9,39 @@ export default function Register() {
   const [pass, setPass] = useState("");
   const { register } = useAuth();
   const nav = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!name || !phone || !email || !pass) {
+      alert("Fill all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      await register(phone, email, pass, name);
+      alert("Account created! Now login");
+      nav("/login");
+    } catch (e: any) {
+      alert("Error: " + e.message);
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div style={{ background: "white", padding: 30, borderRadius: 16, width: "100%", maxWidth: 400 }}>
+    <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <div style={{ background: "white", padding: 24, borderRadius: 12, width: 320 }}>
         <h1 style={{ margin: 0 }}>Create Account</h1>
-        <p style={{ color: "#666" }}>Phone is compulsory, Email is optional</p>
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Full Name *" style={{ width: "100%", padding: 14, marginTop: 20, borderRadius: 10, border: "1px solid #ddd" }} />
-        <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Phone Number * 080..." style={{ width: "100%", padding: 14, marginTop: 12, borderRadius: 10, border: "1px solid #ddd" }} />
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email (Optional)" style={{ width: "100%", padding: 14, marginTop: 12, borderRadius: 10, border: "1px solid #ddd" }} />
-        <input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="Password *" style={{ width: "100%", padding: 14, marginTop: 12, borderRadius: 10, border: "1px solid #ddd" }} />
-        <button onClick={()=>{ if(!name||!phone||!pass) return alert("Name, Phone, Password required!"); if(phone.length<10) return alert("Valid phone needed"); register({name,phone,email,pass}); nav("/dashboard"); }} style={{ width: "100%", marginTop: 20, padding: 14, background: "#7c3aed", color: "white", border: "none", borderRadius: 10, fontWeight: "bold", fontSize: 16 }}>Sign Up</button>
-        <p style={{ textAlign: "center", marginTop: 20 }}>Already have account? <Link to="/login" style={{ color: "#7c3aed", fontWeight: "bold" }}>Sign In</Link></p>
+        <p style={{ color: "#666" }}>Phone is compulsory</p>
+        <input style={{ width: "100%", marginBottom: 10, padding: 10 }} placeholder="Full Name" value={name} onChange={e=>setName(e.target.value)} />
+        <input style={{ width: "100%", marginBottom: 10, padding: 10 }} placeholder="Phone e.g 080..." value={phone} onChange={e=>setPhone(e.target.value)} />
+        <input style={{ width: "100%", marginBottom: 10, padding: 10 }} placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+        <input style={{ width: "100%", marginBottom: 10, padding: 10 }} placeholder="Password" type="password" value={pass} onChange={e=>setPass(e.target.value)} />
+        <button onClick={handleRegister} disabled={loading} style={{ width: "100%", padding: 12, background: "black", color: "white", borderRadius: 8 }}>
+          {loading ? "Creating..." : "Sign Up"}
+        </button>
+        <p style={{ textAlign: "center", marginTop: 12 }}><Link to="/login">Already have account? Login</Link></p>
       </div>
     </div>
   );
