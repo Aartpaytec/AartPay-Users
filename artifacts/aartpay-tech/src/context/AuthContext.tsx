@@ -1,49 +1,39 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect } from "react"
+import { supabase } from "../lib/supabaseClient"
 
-type User = { phone: string; email?: string; name: string };
-type AuthContextType = {
-  user: User | null;
-  login: (phone: string, pass: string) => boolean;
-  register: (data: User & { pass: string }) => void;
-  logout: () => void;
-};
+const AuthContext = createContext<any>(null)
 
-const AuthContext = createContext<AuthContextType>(null!);
-export const useAuth = () => useContext(AuthContext);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: any) => {
+  const [user, setUser] = useState<any>(() => {
+    const saved = localStorage.getItem("aartpay_user")
+    return saved? JSON.parse(saved) : null
+  })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem("aartpay_user");
-    if (saved) setUser(JSON.parse(saved));
-  }, []);
+    if (user) localStorage.setItem("aartpay_user", JSON.stringify(user))
+  }, [user])
 
-  const login = (phone: string, pass: string) => {
-    const users = JSON.parse(localStorage.getItem("aartpay_users") || "[]");
-    const found = users.find((u: any) => u.phone === phone && u.pass === pass);
-    if (found) {
-      const u = { phone: found.phone, email: found.email, name: found.name };
-      setUser(u);
-      localStorage.setItem("aartpay_user", JSON.stringify(u));
-      return true;
-    }
-    return false;
-  };
+  const register = async (phone: string, email: string, password: string, name: string) => {
+    const { data, error } = await supabase.from("users").insert([{ phone, email, name, password }]).select().single()
+    if (error) throw error
+    return data
+  }
 
-  const register = (data: User & { pass: string }) => {
-    const users = JSON.parse(localStorage.getItem("aartpay_users") || "[]");
-    users.push(data);
-    localStorage.setItem("aartpay_users", JSON.stringify(users));
-    const u = { phone: data.phone, email: data.email, name: data.name };
-    setUser(u);
-    localStorage.setItem("aartpay_user", JSON.stringify(u));
-  };
+  const login = async (phone: string, password: string) => {
+    const { data, error } = await supabase.from("users").select("*").eq("phone", phone).eq("password", password).single()
+    if (error ||!data) throw new Error("Wrong phone or password")
+    setUser(data)
+    localStorage.setItem("aartpay_user", JSON.stringify(data))
+    return data
+  }
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem("aartpay_user");
-  };
+    setUser(null)
+    localStorage.removeItem("aartpay_user")
+  }
 
-  return <AuthContext.Provider value={{ user, login, register, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, login, register, logout, loading }}>{children}</AuthContext.Provider>
 }
+
+export const useAuth = () => useContext(AuthContext)
