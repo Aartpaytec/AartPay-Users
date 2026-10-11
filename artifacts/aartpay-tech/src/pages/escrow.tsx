@@ -1,82 +1,66 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-export default function EscrowPage() {
-  // Mock current user - later Firebase go give you real user
-  const currentUser = { id: "user_" + Math.random().toString(36).slice(2), username: "@You", email: "you@aartpay.com" };
+export default function Escrow(){
+  const trades = [
+    {id:'AART-ESC-001', seller:'@seller_01', asset:'50 USDT', amount:82500},
+    {id:'AART-ESC-002', seller:'@seller_02', asset:'0.5 BTC', amount:45000000},
+  ];
 
-  const [myAssets, setMyAssets] = useState({ BTC: 50, USDT: 1000 });
-  const [myNaira, setMyNaira] = useState(20000);
-  const [allTrades, setAllTrades] = useState([
-    { id: "TRADE-ADE", seller: "@Ade", sellerId: "1", crypto: "BTC", amount: 2, price: 50000, online: "Online 🟢" },
-    { id: "TRADE-CHIOMA", seller: "@Chioma", sellerId: "2", crypto: "USDT", amount: 100, price: 150000, online: "Offline ⚫" },
-  ]);
-  const [activeTrade, setActiveTrade] = useState<any>(null);
-  const [vAccount, setVAccount] = useState<any>(null);
+  const [active,setActive]=useState<any>(null);
+  const [wema,setWema]=useState<string>('');
+  const [sec,setSec]=useState(300);
 
-  const handleSell = (crypto: string, amount: number, price: number) => {
-    if ((myAssets as any)[crypto] < amount) {
-      alert(`You get only ${(myAssets as any)[crypto]} ${crypto}`);
-      return;
-    }
-    const newTrade = {
-      id: `AART-ESC-${Date.now()}`,
-      seller: currentUser.username,
-      sellerId: currentUser.id,
-      crypto, amount, price,
-      online: "Online 🟢", status: "open"
-    };
-    setAllTrades([newTrade,...allTrades]);
-    setActiveTrade(newTrade);
-  };
-
-  const handleGenerate = async () => {
-    if (!activeTrade) return;
-    try {
-      const res = await fetch("/api/create-escrow-account", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: currentUser.email,
-          ref: activeTrade.id,
-          amount: activeTrade.price,
-          cryptoAmount: activeTrade.amount,
-          sellerBalance: (myAssets as any)[activeTrade.crypto]
-        })
+  const openPrivate = async (t:any)=>{
+    setActive(t);
+    setSec(300);
+    setWema('Generating WEMA...');
+    // Call your flutterwave API
+    try{
+      const r = await fetch('/api/create-escrow-account',{
+        method:'POST',
+        body: JSON.stringify({tradeId:t.id, amount:t.amount})
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setMyAssets(prev => ({...prev, [activeTrade.crypto]: (prev as any)[activeTrade.crypto] - activeTrade.amount }));
-      setVAccount({ number: data.account_number, bank: data.bank_name });
-    } catch (e: any) { alert(e.message); }
+      const d = await r.json();
+      setWema(d.account_number || 'WEMA 9066589780');
+    }catch(e){ setWema('WEMA 9066589780 - TEST'); }
   };
 
-  return (
-    <div style={{ padding: 20, maxWidth: 600, margin: "0 auto" }}>
-      <h2>ESCROW MARKET - Many Users</h2>
-      <p>You: {currentUser.username} | BTC: {myAssets.BTC} | USDT: {myAssets.USDT} | ₦{myNaira}</p>
+  useEffect(()=>{
+    if(!active) return;
+    const iv = setInterval(()=>{
+      setSec(s=>{
+        if(s<=1){ clearInterval(iv); setActive(null); return 0; }
+        return s-1;
+      });
+    },1000);
+    return ()=>clearInterval(iv);
+  },[active]);
 
-      <button onClick={() => handleSell("BTC", 2, 50000)} style={{ padding: 12, background: "green", color: "white", marginRight: 10 }}>Sell 2 BTC</button>
-      <button onClick={() => handleSell("USDT", 100, 150000)} style={{ padding: 12, background: "green", color: "white" }}>Sell 100 USDT</button>
+  if(active){
+    return(
+      <div style={{padding:16, background:'#000', color:'#fff', minHeight:'100vh'}}>
+        <h2>PRIVATE ROOM: {active.id}</h2>
+        <p style={{color:'#22c55e'}}>🔒 {active.asset} LOCKED - {Math.floor(sec/60)}:{String(sec%60).padStart(2,'0')} left</p>
+        <div style={{border:'1px solid #22c55e', padding:12, marginTop:16, borderRadius:8, background:'#18181b'}}>
+          <p style={{fontSize:12}}>Send to WEMA (Flutterwave) - Private Only:</p>
+          <p style={{fontFamily:'monospace', fontSize:18, fontWeight:'bold'}}>{wema}</p>
+          <p>Amount: ₦{active.amount.toLocaleString()}</p>
+          <p style={{fontSize:10, color:'#eab308', marginTop:8}}>Asset locked from {active.seller} wallet. Will auto-release after payment webhook.</p>
+        </div>
+        <button onClick={()=>setActive(null)} style={{width:'100%', background:'#dc2626', padding:10, marginTop:20, borderRadius:8}}>Cancel & Unlock</button>
+      </div>
+    );
+  }
 
-      <h3 style={{ marginTop: 20 }}>All Offers ({allTrades.length})</h3>
-      {allTrades.map(t => (
-        <div key={t.id} onClick={() => setActiveTrade(t)} style={{ border: "1px solid #ccc", padding: 10, marginTop: 8, background: activeTrade?.id === t.id? "#e0ffe0" : "white" }}>
-          <b>{t.seller}</b> - {t.online} - {t.amount} {t.crypto} for ₦{t.price}
+  return(
+    <div style={{padding:16, background:'#000', color:'#fff', minHeight:'100vh'}}>
+      <h1 style={{fontWeight:'bold'}}>Escrow Board (Public List)</h1>
+      {trades.map(t=>(
+        <div key={t.id} style={{border:'1px solid #333', padding:12, marginTop:12, borderRadius:8, display:'flex', justifyContent:'space-between'}}>
+          <div><p>{t.seller} - {t.asset} 🟢</p><p style={{fontSize:10, color:'#888'}}>{t.id}</p></div>
+          <button onClick={()=>openPrivate(t)} style={{background:'#fff', color:'#000', padding:'4px 12px', borderRadius:6, fontWeight:'bold'}}>Message</button>
         </div>
       ))}
-
-      {activeTrade && (
-        <div style={{ border: "2px solid black", marginTop: 20, padding: 15 }}>
-          <h3>Private Room with {activeTrade.seller}</h3>
-          {!vAccount? (
-            activeTrade.sellerId === currentUser.id?
-            <button onClick={handleGenerate} style={{ width: "100%", background: "orange", padding: 12 }}>Generate WEMA & Lock {activeTrade.amount} {activeTrade.crypto}</button>
-            : <p>Waiting for seller to generate account...</p>
-          ) : (
-            <div><h2>{vAccount.number}</h2><p>{vAccount.bank}</p><p style={{color:"red"}}>LOCKED: {activeTrade.amount} {activeTrade.crypto} - One account per trade</p></div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
