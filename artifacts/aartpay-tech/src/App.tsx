@@ -4,11 +4,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/dashboard";
 import Service from "./pages/service";
+import Escrow from "./pages/escrow";
+import DollarCards from "./pages/dollar-cards";
+import Electricity from "./pages/electricity";
 
 function Protected({ children }: any) {
   const { user } = useAuth();
   const saved = localStorage.getItem("aartpay_user");
-  const currentUser = user || (saved? JSON.parse(saved) : null);
+  const currentUser = user || (saved ? JSON.parse(saved) : null);
   if (!currentUser) return <Navigate to="/login" replace />;
   return children;
 }
@@ -21,17 +24,17 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
 
-        {/* ALL YOUR 11 SERVICES - NOW POINT TO SAME Service FILE */}
+        {/* CORRECT ROUTES NOW */}
         <Route path="/gift-cards" element={<Protected><Service /></Protected>} />
         <Route path="/crypto" element={<Protected><Service /></Protected>} />
-        <Route path="/dollar-cards" element={<Protected><Service /></Protected>} />
+        <Route path="/dollar-cards" element={<Protected><DollarCards /></Protected>} />
         <Route path="/tv" element={<Protected><Service /></Protected>} />
-        <Route path="/electricity" element={<Protected><Service /></Protected>} />
+        <Route path="/electricity" element={<Protected><Electricity /></Protected>} />
         <Route path="/airtime" element={<Protected><Service /></Protected>} />
         <Route path="/betting" element={<Protected><Service /></Protected>} />
         <Route path="/utilities" element={<Protected><Service /></Protected>} />
         <Route path="/transfer" element={<Protected><Service /></Protected>} />
-        <Route path="/escrow" element={<Protected><Service /></Protected>} />
+        <Route path="/escrow" element={<Protected><Escrow /></Protected>} />
         <Route path="/fund-wallet" element={<Protected><Service /></Protected>} />
         <Route path="/service/:id" element={<Protected><Service /></Protected>} />
 
