@@ -1,74 +1,51 @@
 import { useState } from 'react';
 
-export default function CryptoPage(){
-  const [filter, setFilter] = useState('All');
-
-  const liveRates = [
-    {symbol:'BTC', name:'Bitcoin', price:'₦112,450,000', change:'+2.3%', color:'bg-orange-100'},
-    {symbol:'USDT', name:'Tether USD', price:'₦1,650', change:'+0.01%', color:'bg-green-100'},
-    {symbol:'ETH', name:'Ethereum', price:'₦4,250,000', change:'-0.8%', color:'bg-blue-100'},
-    {symbol:'SOL', name:'Solana', price:'₦145,000', change:'+5.1%', color:'bg-purple-100'},
-  ];
-
-  const p2pOffers = [
-    {id:'CRY-001', seller:'@btc_lagos', asset:'0.5 BTC', price:'₦112M / BTC', limit:'₦50k - ₦5M'},
-    {id:'CRY-002', seller:'@usdt_abuja', asset:'500 USDT', price:'₦1,650 / $1', limit:'₦10k - ₦825k'},
-    {id:'CRY-003', seller:'@ib_eth', asset:'2 ETH', price:'₦4.25M / ETH', limit:'₦100k - ₦8.5M'},
+export default function Crypto() {
+  const [cur, setCur] = useState<'USD'|'NGN'>('NGN');
+  
+  const coins = [
+    {s:'BTC', name:'Bitcoin', usd:'$69,420', ngn:'₦112,450,000', ch:'+2.3%', up:true},
+    {s:'ETH', name:'Ethereum', usd:'$2,840', ngn:'₦4,250,000', ch:'-0.8%', up:false},
+    {s:'USDT', name:'Tether', usd:'$1.00', ngn:'₦1,650', ch:'+0.01%', up:true},
+    {s:'SOL', name:'Solana', usd:'$145.20', ngn:'₦238,000', ch:'+5.1%', up:true},
+    {s:'BNB', name:'BNB', usd:'$610', ngn:'₦1,010,000', ch:'+1.2%', up:true},
   ];
 
   return (
-    <div className="min-h-screen bg-white text-black p-4">
-      <h1 className="font-bold text-xl">Crypto</h1>
-      <p className="text-xs text-gray-500">Live market + P2P — No escrow account here</p>
-
-      {/* Filter like Binance */}
-      <div className="flex gap-2 mt-4">
-        {['All','BTC','USDT','ETH'].map(f=>(
-          <button key={f} onClick={()=>setFilter(f)} className={`px-4 py-1.5 rounded-full text-xs font-bold ${filter===f?'bg-black text-white':'bg-gray-100'}`}>{f}</button>
-        ))}
+    <div style={{minHeight:'100vh', background:'#f8f9fb', fontFamily:'-apple-system, sans-serif'}}>
+      <div style={{background:'white', padding:'16px 20px', borderBottom:'1px solid #eee'}}>
+        <b style={{fontSize:'18px'}}>Crypto</b>
+        <p style={{fontSize:'12px', color:'#888'}}>Live market rates</p>
       </div>
 
-      {/* LIVE LIST - THIS WAS MISSING */}
-      <div className="mt-5">
-        <h2 className="font-bold text-sm">📈 Live Rates</h2>
-        <div className="mt-3 space-y-2">
-          {liveRates.filter(c=>filter==='All' || c.symbol===filter).map(c=>(
-            <div key={c.symbol} className="flex justify-between items-center border rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-full ${c.color} flex items-center justify-center font-bold text-xs`}>{c.symbol[0]}</div>
+      <div style={{maxWidth:'400px', margin:'0 auto', padding:'16px'}}>
+        {/* USD / NGN toggle */}
+        <div style={{background:'#eeeeee', borderRadius:'100px', padding:'4px', display:'flex', width:'fit-content', gap:'4px'}}>
+          <button onClick={()=>setCur('NGN')} style={{padding:'8px 20px', borderRadius:'100px', border:'none', background: cur==='NGN'?'white':'transparent', fontWeight:600, fontSize:'12px'}}>₦ Naira</button>
+          <button onClick={()=>setCur('USD')} style={{padding:'8px 20px', borderRadius:'100px', border:'none', background: cur==='USD'?'white':'transparent', fontWeight:600, fontSize:'12px'}}>$ Dollar</button>
+        </div>
+
+        {/* LIST */}
+        <div style={{marginTop:'18px', display:'flex', flexDirection:'column', gap:'10px'}}>
+          {coins.map(c=>(
+            <div key={c.s} style={{background:'white', borderRadius:'16px', padding:'16px', display:'flex', justifyContent:'space-between', alignItems:'center', border:'1px solid #f0f0f0'}}>
+              <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+                <div style={{width:'40px', height:'40px', borderRadius:'50%', background:'#f5f5f5', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'12px'}}>{c.s[0]}</div>
                 <div>
-                  <p className="font-bold text-sm">{c.name}</p>
-                  <p className="text-xs text-gray-500">{c.symbol}</p>
+                  <div style={{fontWeight:600, fontSize:'14px'}}>{c.name}</div>
+                  <div style={{fontSize:'11px', color:'#888'}}>{c.s}</div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-sm">{c.price}</p>
-                <p className={`text-xs font-bold ${c.change.includes('+')?'text-green-600':'text-red-600'}`}>{c.change}</p>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontWeight:700, fontSize:'14px'}}>{cur==='NGN'?c.ngn:c.usd}</div>
+                <div style={{fontSize:'11px', fontWeight:600, color: c.up?'#16a34a':'#dc2626'}}>{c.ch}</div>
               </div>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Crypto P2P Board - separate from Escrow */}
-      <div className="mt-8">
-        <h2 className="font-bold text-sm">🟢 Crypto P2P Board</h2>
-        <p className="text-[11px] text-gray-500">Message seller → opens private escrow room</p>
-        <div className="mt-3 space-y-3">
-          {p2pOffers.map(o=>(
-            <div key={o.id} className="border rounded-2xl p-4">
-              <div className="flex justify-between">
-                <p className="font-bold text-sm">{o.asset} available</p>
-                <p className="text-xs bg-gray-100 px-2 py-1 rounded-full">{o.limit}</p>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">{o.seller} • {o.price} • {o.id}</p>
-              <button className="w-full mt-3 bg-black text-white py-2 rounded-full text-xs font-bold">Message {o.seller} — Trade with Escrow</button>
-            </div>
-          ))}
-        </div>
+        <p style={{fontSize:'10px', color:'#aaa', textAlign:'center', marginTop:'16px'}}>Auto-refresh • Powered by AartPay</p>
       </div>
-
-      <p className="text-[10px] text-center text-gray-400 mt-6">Rates auto-refresh • Escrow locked in private room only</p>
     </div>
   )
 }
