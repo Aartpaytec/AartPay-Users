@@ -1,54 +1,27 @@
-import { useState } from 'react';
-
+import {useState} from 'react'
 export default function Airtime(){
-  const [tab,setTab]=useState("airtime");
-  const [phone,setPhone]=useState("09169527575");
-  const [network,setNetwork]=useState("MTN");
-  const [amount,setAmount]=useState("");
-  const [plan,setPlan]=useState("");
-
-  const networks = [
-    {id:"MTN", color:"#ffcc00", text:"#111"},
-    {id:"GLO", color:"#16a34a", text:"#fff"},
-    {id:"AIRTEL", color:"#ef4444", text:"#fff"},
-    {id:"9MOBILE", color:"#111827", text:"#fff"},
-  ];
-  const currentNet = networks.find(n=>n.id===network)!;
-
-  const airtimeAmounts = [50,100,200,300,400,500];
-
-  const dataPlans = [
-    {name:"500MB", price:300, valid:"2 Days"},
-    {name:"1GB", price:500, valid:"1 Day"},
-    {name:"2GB", price:1000, valid:"7 Days"},
-    {name:"3GB", price:1500, valid:"30 Days"},
-    {name:"5GB", price:2500, valid:"30 Days"},
-    {name:"10GB", price:4000, valid:"30 Days"},
-    {name:"20GB", price:7000, valid:"30 Days"},
-    {name:"40GB", price:12000, valid:"30 Days"},
-  ];
-
-  return(
-    <div style={{background:"#f5f7f6", minHeight:"100vh", padding:16, fontFamily:"system-ui", paddingBottom:90}}>
-      
-      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-        <button onClick={()=>history.back()} style={{border:"none", background:"#fff", width:36, height:36, borderRadius:18, fontSize:20}}>‹</button>
-        <b style={{fontSize:16}}>Airtime & Data</b>
-        <span style={{color:"#16a34a", fontSize:13, fontWeight:700, background:"#fff", padding:"6px 12px", borderRadius:20}}>History</span>
-      </div>
-
-      {/* TABS - Airtime | Data */}
-      <div style={{marginTop:12, background:"#fff", borderRadius:20, padding:4, display:"flex", gap:4, border:"1px solid #eef2f0"}}>
-        <button onClick={()=>setTab("airtime")} style={{flex:1, border:"none", borderRadius:16, padding:"10px", fontWeight:800, fontSize:13, background: tab==="airtime" ? "#111" : "transparent", color: tab==="airtime" ? "#fff" : "#64748b"}}>Airtime</button>
-        <button onClick={()=>setTab("data")} style={{flex:1, border:"none", borderRadius:16, padding:"10px", fontWeight:800, fontSize:13, background: tab==="data" ? "#111" : "transparent", color: tab==="data" ? "#fff" : "#64748b"}}>Data</button>
-      </div>
-
-      {/* Phone + Network Selector - SHOW FOR BOTH */}
-      <div style={{marginTop:14, background:"#fff", borderRadius:14, padding:12, display:"flex", alignItems:"center", gap:10, border:"1.5px solid #eef2f0"}}>
-        <div style={{background:currentNet.color, color:currentNet.text, width:36, height:36, borderRadius:18, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:900, fontSize:10}}>{network.slice(0,3)}</div>
-        <select value={network} onChange={e=>setNetwork(e.target.value)} style={{border:"none", fontSize:12, fontWeight:700, color:"#475569", background:"transparent", outline:"none"}}>
-          {networks.map(n=><option key={n.id}>{n.id}</option>)}
-        </select>
-        <input value={phone} onChange={e=>setPhone(e.target.value)} style={{flex:1, border:"none", fontWeight:700, fontSize:15, outline:"none"}} placeholder="091 6952 7575"/>
-        <div style={{width:30, height:30, background:"#16a34a", borderRadius:15, display:"flex", alignItems:"center", justifyContent:"center", color:"white", fontSize:14}}>👤</div>
-      </div>
+const [a,setA]=useState("")
+const [p,setP]=useState("09169527575")
+const [n,setN]=useState("MTN")
+return(
+<div style={{padding:16,background:"#f5f7f6",minHeight:"100vh"}}>
+<div style={{display:"flex",justifyContent:"space-between"}}>
+<button onClick={()=>history.back()}>‹</button><b>Airtime & Data</b><span style={{color:"green"}}>History</span>
+</div>
+<select value={n} onChange={e=>setN(e.target.value)} style={{marginTop:12,width:"100%",padding:10,borderRadius:10}}>
+<option>MTN</option><option>GLO</option><option>AIRTEL</option><option>9MOBILE</option>
+</select>
+<input value={p} onChange={e=>setP(e.target.value)} style={{marginTop:8,width:"100%",padding:12,borderRadius:10,border:"1px solid #ddd"}} />
+<div style={{marginTop:10,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+{[50,100,200,300,400,500].map(v=>(
+<button key={v} onClick={()=>setA(String(v))} style={{padding:12,borderRadius:10,border:"1px solid #ddd",background:a==String(v)?"#111":"#fff",color:a==String(v)?"#fff":"#000"}}>₦{v}</button>
+))}
+</div>
+<div style={{marginTop:12,display:"flex",gap:8,background:"#fff",padding:8,borderRadius:12,border:"1px solid #ddd"}}>
+<input value={a} onChange={e=>setA(e.target.value)} placeholder="50-500k" style={{flex:1,border:"none"}}/>
+<button style={{background:"#16a34a",color:"#fff",border:"none",borderRadius:20,padding:"8px 18px"}}>Pay</button>
+</div>
+<div style={{marginTop:12,background:"#fff",padding:10,borderRadius:10,fontSize:12}}>All Networks: MTN • GLO • AIRTEL • 9MOBILE - Cashback Active</div>
+</div>
+)
+}
