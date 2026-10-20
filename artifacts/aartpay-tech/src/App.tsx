@@ -14,6 +14,7 @@ import Transfer from './pages/transfer';
 import Service from './pages/service';
 import Escrow from './pages/escrow';
 import Cable from './pages/cable';
+import Utilities from './pages/utilities';
 
 function Protected({ children }: any) {
   const { user } = useAuth();
@@ -40,11 +41,16 @@ export default function App() {
         <Route path="/escrow" element={<Protected><Escrow /></Protected>} />
         <Route path="/service/:id" element={<Protected><Service /></Protected>} />
 
-        {/* TV SUB - ORIGINAL */}
+        {/* TV SUB */}
         <Route path="/cable" element={<Protected><Cable /></Protected>} />
         <Route path="/tvsub" element={<Protected><Cable /></Protected>} />
         <Route path="/tv-sub" element={<Protected><Cable /></Protected>} />
         <Route path="/tv" element={<Protected><Cable /></Protected>} />
+
+        {/* UTILITIES - NEW HUB */}
+        <Route path="/utilities" element={<Protected><Utilities /></Protected>} />
+        <Route path="/utility" element={<Protected><Utilities /></Protected>} />
+        <Route path="/utilities-hub" element={<Protected><Utilities /></Protected>} />
 
         {/* GIFT CARDS */}
         <Route path="/gift-cards" element={<Protected><GiftCards /></Protected>} />
