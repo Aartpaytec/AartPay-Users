@@ -12,11 +12,16 @@ import FundWallet from './pages/fund-wallet';
 import Transactions from './pages/transactions';
 import Transfer from './pages/transfer';
 import DataPage from './pages/data';
+import Login from './pages/login';
+import Register from './pages/register';
+import Utilities from './pages/utilities';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/escrow" element={<Escrow />} />
       <Route path="/crypto" element={<Crypto />} />
@@ -32,7 +37,8 @@ export default function App() {
       <Route path="/fund-wallet" element={<FundWallet />} />
       <Route path="/transactions" element={<Transactions />} />
       <Route path="/transfer" element={<Transfer />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/utilities" element={<Utilities />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
