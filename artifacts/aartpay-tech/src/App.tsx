@@ -13,6 +13,7 @@ import Crypto from './pages/crypto';
 import Transfer from './pages/transfer';
 import Service from './pages/service';
 import Escrow from './pages/escrow';
+import Cable from './pages/cable';
 
 function Protected({ children }: any) {
   const { user } = useAuth();
@@ -39,7 +40,13 @@ export default function App() {
         <Route path="/escrow" element={<Protected><Escrow /></Protected>} />
         <Route path="/service/:id" element={<Protected><Service /></Protected>} />
 
-        {/* FIXED - GIFT CARDS NOW SHOWS YOUR NEW DESIGN */}
+        {/* TV SUB - ORIGINAL */}
+        <Route path="/cable" element={<Protected><Cable /></Protected>} />
+        <Route path="/tvsub" element={<Protected><Cable /></Protected>} />
+        <Route path="/tv-sub" element={<Protected><Cable /></Protected>} />
+        <Route path="/tv" element={<Protected><Cable /></Protected>} />
+
+        {/* GIFT CARDS */}
         <Route path="/gift-cards" element={<Protected><GiftCards /></Protected>} />
         <Route path="/giftcards" element={<Protected><GiftCards /></Protected>} />
 
