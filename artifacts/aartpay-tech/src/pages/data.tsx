@@ -1,31 +1,51 @@
 import { useState } from 'react';
-export default function Data(){
-const [phone,setPhone]=useState('09150527575');
-const [network,setNetwork]=useState('MTN');
-const [plan,setPlan]=useState('');
-const plans=[
-{name:'500MB',price:300},
-{name:'1GB',price:500},
-{name:'2GB',price:1000},
-{name:'3GB',price:1500},
-{name:'5GB',price:2500},
-{name:'10GB',price:4000},
+
+const plans = [
+  { id:'500MB', name:'500MB - 1 Day', price:300 },
+  { id:'1GB', name:'1GB - 1 Day', price:500 },
+  { id:'2GB', name:'2GB - 2 Days', price:1000 },
+  { id:'3GB', name:'3GB - 3 Days', price:1500 },
+  { id:'5GB', name:'5GB - 7 Days', price:2500 },
+  { id:'10GB', name:'10GB - 30 Days', price:4000 },
 ];
-return(
-<div style={{padding:16,background:'#f5f7f6',minHeight:'100vh'}}>
-<div style={{display:'flex',justifyContent:'space-between'}}>
-<button onClick={()=>history.back()}>Back</button><b>Data</b><span>History</span>
-</div>
-<div style={{marginTop:12,background:'#fff',padding:12,borderRadius:12}}>
-<select value={network} onChange={e=>setNetwork(e.target.value)} style={{width:'100%',padding:12,borderRadius:10}}>
-<option>MTN</option><option>GLO</option><option>AIRTEL</option><option>9MOBILE</option>
-</select>
-<input value={phone} onChange={e=>setPhone(e.target.value)} style={{width:'100%',padding:12,marginTop:8,borderRadius:10,border:'1px solid #ddd'}} />
-<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:8}}>
-{plans.map(v=><button key={v.name} onClick={()=>setPlan(v.name)} style={{padding:10,borderRadius:8,border: plan===v.name ? '2px solid #16a34a' : '1px solid #ddd',background:'#fff'}}><b>{v.name}</b><br/>{v.price}</button>)}
-</div>
-<button style={{marginTop:12,width:'100%',background:'#16a34a',color:'#fff',padding:12,borderRadius:10,border:'none'}}>Buy Data</button>
-</div>
-</div>
-)
+
+export default function Data(){
+  const [phone,setPhone]=useState('09150527575');
+  const [network,setNetwork]=useState('MTN');
+  const [plan,setPlan]=useState('1GB');
+
+  return(
+    <div style={{padding:16,background:'#eef2f7',minHeight:'100vh',fontFamily:'sans-serif'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <button onClick={()=>history.back()} style={{border:'none',background:'#fff',padding:'8px 12px',borderRadius:8}}>Back</button>
+        <b>Data</b>
+        <span style={{background:'#fff',padding:'8px 12px',borderRadius:8}}>History</span>
+      </div>
+
+      <div style={{marginTop:16,background:'#fff',padding:16,borderRadius:16}}>
+        <p style={{fontWeight:600}}>Network</p>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8,marginTop:8}}>
+          {['MTN','GLO','AIRTEL','9MOBILE'].map(n=>(
+            <button key={n} onClick={()=>setNetwork(n)} style={{padding:10,borderRadius:8,border: network===n ? '2px solid #16a34a' : '1px solid #ddd',background: network===n ? '#f0fdf4' : '#fff',fontWeight:600}}>{n}</button>
+          ))}
+        </div>
+
+        <p style={{fontWeight:600,marginTop:16}}>Phone Number</p>
+        <input value={phone} onChange={e=>setPhone(e.target.value)} style={{width:'100%',padding:14,marginTop:6,borderRadius:10,border:'1px solid #ddd'}} />
+
+        <p style={{fontWeight:600,marginTop:16}}>Select Plan</p>
+        <div style={{display:'grid',gridTemplateColumns:'1fr',gap:8,marginTop:8}}>
+          {plans.map(p=>(
+            <button key={p.id} onClick={()=>setPlan(p.id)} style={{textAlign:'left',padding:12,borderRadius:10,border: plan===p.id ? '2px solid #16a34a' : '1px solid #ddd',background: plan===p.id ? '#f0fdf4' : '#fff',display:'flex',justifyContent:'space-between'}}>
+              <span><b>{p.name}</b></span><span style={{fontWeight:700}}>₦{p.price}</span>
+            </button>
+          ))}
+        </div>
+
+        <button style={{marginTop:20,width:'100%',background:'#16a34a',color:'#fff',padding:14,borderRadius:12,border:'none',fontWeight:700,fontSize:16}}>
+          Buy {network} {plan} Data
+        </button>
+      </div>
+    </div>
+  )
 }
