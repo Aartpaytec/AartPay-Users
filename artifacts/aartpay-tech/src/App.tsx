@@ -12,17 +12,30 @@ import FundWallet from './pages/fund-wallet';
 import Transactions from './pages/transactions';
 import Transfer from './pages/transfer';
 import DataPage from './pages/data';
-import Login from './pages/login';
-import Register from './pages/register';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import Utilities from './pages/utilities';
+import Service from './pages/service';
+import Signin from './pages/signin';
+import Signup from './pages/signup';
+import NotFound from './pages/not-found';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Auth - compulsory login */}
+      <Route path="/" element={<Navigate to="/Login" replace />} />
+      <Route path="/Login" element={<Login />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/Register" element={<Register />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/signin" element={<Signin />} />
+      <Route path="/signup" element={<Signup />} />
+
+      {/* Main Dashboard */}
       <Route path="/dashboard" element={<Dashboard />} />
+      
+      {/* Your real services from morning */}
       <Route path="/escrow" element={<Escrow />} />
       <Route path="/crypto" element={<Crypto />} />
       <Route path="/airtime" element={<Airtime />} />
@@ -38,7 +51,11 @@ export default function App() {
       <Route path="/transactions" element={<Transactions />} />
       <Route path="/transfer" element={<Transfer />} />
       <Route path="/utilities" element={<Utilities />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="/service" element={<Service />} />
+
+      {/* Catch all */}
+      <Route path="/404" element={<NotFound />} />
+      <Route path="*" element={<Navigate to="/Login" replace />} />
     </Routes>
   );
 }
