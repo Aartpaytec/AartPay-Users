@@ -1,32 +1,14 @@
-export default async function handler(req, res) {
-  const BASE = process.env.BUSHA_BASE_URL;
-  const KEY = process.env.BUSHA_SECRET_KEY;
-
-  if (!KEY || !BASE) {
-    return res.status(500).json({ error: "Keys not set in Vercel" });
-  }
-
-  try {
-    // Try to get ticker from Busha sandbox
-    const response = await fetch(`${BASE}/api/v3/tickers?local_currency=NGN`, {
-      headers: {
-        'Authorization': `Bearer ${KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const data = await response.json();
-    return res.status(200).json({ success: true, source: "Busha", data });
-
-  } catch (err) {
-    // Fallback - if Busha fails, return mock so page no break
-    return res.status(200).json({ 
-      success: false, 
-      error: err.message,
-      fallback: [
-        { coin: "BTC", name: "Bitcoin", ngn: 112000000 },
-        { coin: "USDT", name: "Tether", ngn: 1620 }
-      ]
-    });
-  }
+export default async function handler(req,res){
+ try{
+  const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,tether,ethereum,solana,binancecoin&vs_currencies=ngn,usd');
+  const p=await r.json();
+  const data=[
+   {base_currency:'BTC',price:p.bitcoin?.ngn,usd:p.bitcoin?.usd},
+   {base_currency:'USDT',price:p.tether?.ngn,usd:p.tether?.usd},
+   {base_currency:'ETH',price:p.ethereum?.ngn,usd:p.ethereum?.usd},
+   {base_currency:'SOL',price:p.solana?.ngn,usd:p.solana?.usd},
+   {base_currency:'BNB',price:p.binancecoin?.ngn,usd:p.binancecoin?.usd},
+  ];
+  return res.status(200).json({data});
+ }catch(e){return res.status(200).json({error:e.message});}
 }
